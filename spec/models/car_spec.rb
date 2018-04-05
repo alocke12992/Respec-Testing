@@ -10,25 +10,75 @@ RSpec.describe Car, type: :model do
     end 
   end
 
-  describe 'validations' do 
-    it {should validate_presence_of :make}
-    it {should validate_uniqueness_of :make}
+  describe 'validations' do
+    it { should validate_presence_of :make }
+    it { should validate_uniqueness_of :make }
   end
 
-  describe 'filtering' do 
-    before(:each) do 
-      [
-        {make: 'Toyota', model: 'Prius', price: 20000},
-        {make: 'Honda', model: 'Civic', price: 1900},
-        {make: 'Ford', model: 'F-150', price: 13498},
-      ].each do |attrs|
-        Car.create(attrs)
-      end
+  describe 'filtering' do
+    before(:each) do
+      @car1 = Car.create({ 
+        make: 'Toyota', 
+        model: 'Prius', 
+        price: 20000 
+      })
+
+      @car2 = Car.create({
+        make: 'Ford', 
+        model: 'F-150', 
+        price: 19999
+      })
+
+      @car3 = Car.create({
+        make: 'Abe', 
+        model: 'Lincoln', 
+        price:1900
+      })
     end
-    it 'sorts by model ASC' do 
+    
+    it 'sorts by model ASC' do
       cars = Car.by_model
-      expect(cars.first.model).to eq('Civic')
-      expect(cars.last.model).to eq('Prius')
+      expect(cars.first).to eq(@car2)
+      expect(cars.last).to eq(@car1)
+    end
+
+    it 'sorts by price ASC' do
+      cars = Car.by_price
+      expect(cars.first).to eq(@car3)
+      expect(cars.last).to eq(@car1)
+    end
+
+    it 'sorts by price DESC' do
+      cars = Car.by_price(:desc)
+      expect(cars.first).to eq(@car1)
+      expect(cars.last).to eq(@car3)
+    end
+  end
+
+  describe 'behavior' do
+    before(:each) do
+      @attrs = {
+        make: 'Toyota', 
+        model: 'Tacoma',
+        color: 'green',
+        price: 20000
+      }
+
+      @car = Car.create(@attrs)
+    end
+
+    it 'can be painted' do
+      color = 'rainbow'
+      @car.paint(color)
+      expect(@car.color).to eq(color)
+    end
+
+    it 'honks' do
+      expect(@car.honk).to eq('BEEP BEEP')
+    end
+
+    it 'displays info' do
+      expect(@car.info).to eq(@attrs)
     end
   end
 
